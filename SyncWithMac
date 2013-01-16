@@ -1,0 +1,2 @@
+rsync -avz -e ssh holodeck1@152.3.12.207:Documents/MATLAB/Code/data/ ~/Documents/PostDoc/Holodeck/Code/data/
+zenity --title "Sync with Mac" --info --text "Done"

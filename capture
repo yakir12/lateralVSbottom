@@ -1,0 +1,3 @@
+#!/bin/sh
+killall PTPCamera
+/opt/local/bin/gphoto2 --capture-image-and-download --filename /Users/holodeck1/Documents/MATLAB/Code/temp.jpg
