@@ -1,1 +1,0 @@
-convert -size 300x300 xc:black -fill white -draw "push graphic-context translate 150,150 rotate 0 fill white  ellipse 0,0 30,60 0,360 pop graphic-context" -colors 2 ellipse_rotated.gif
