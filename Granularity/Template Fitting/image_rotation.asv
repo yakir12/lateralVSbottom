@@ -1,0 +1,98 @@
+% function [rot_deg] = image_rotation(orig_img)
+% This function takes as input an image, called orig_img, and uses
+% regression to determine the angle at which it must be rotated in order to
+% point the narrow end (i.e., cuttlefish head) to the left
+
+%% Read and Pre-process orig image %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Read in an original image
+orig_img=imread('Cuttlefish1.jpg');
+% Convert image to grayscale if colored
+if size(orig_img,3)==3
+    orig_img=rgb2gray(orig_img);
+end
+
+%% Trim the orig_img of any empty vertical and horizontal edges
+orig_img_edge = edge(orig_img, 'prewitt');
+rv = [];
+cv = [];
+for ii = 1:size(orig_img_edge,1) % rows
+    if isempty(find(orig_img_edge(ii,:))) % empty horizontal edge exist
+        rv = [rv ii];
+    end
+end
+for ii = 1:size(orig_img_edge,2) % columns
+    if isempty(find(orig_img_edge(:,ii))) % empty vertical edge exist
+        cv = [cv ii];
+    end
+end
+orig_img(rv,:) = [];
+orig_img(:,cv) = [];
+
+%% Find the orig_img boundaries 
+orig_img_edge = edge(orig_img, 'prewitt');
+
+% go through each column and find the border of orig_img_edge
+orig_edge_upper = zeros(1,size(orig_img_edge,2));
+orig_edge_lower = zeros(1,size(orig_img_edge,2));
+for ii = 1:size(orig_img_edge,2) 
+        orig_edge_upper(ii) = find(orig_img_edge(:,ii),1,'first');
+        orig_edge_lower(ii) = find(orig_img_edge(:,ii),1,'last');
+end
+
+%% Interlace the upper boundary points with lower boundary points
+orig_edge_upper = orig_edge_upper(1:2:end);
+orig_edge_lower = orig_edge_lower(1:2:end);
+
+if length(orig_edge_upper) > length(orig_edge_lower)
+    orig_edge_lower = [orig_edge_lower 0];
+elseif length(orig_edge_upper) < length(orig_edge_lower)
+    orig_edge_upper = [orig_edge_upper 0];
+end
+    
+%% Perform linear regression to find the rotational angle
+orig_boundaries = [orig_edge_upper; orig_edge_lower];
+orig_boundaries = reshape(orig_boundaries,2*size(orig_edge_upper,2),1);
+b = regress(orig_boundaries,[ones(size(orig_boundaries,1),1) [1:size(orig_boundaries,1)]']);
+rot_deg = (180/pi)*atan(b(2));
+
+%% Rotate the image according to rot_deg and determine which end is narrow
+orig_rotated = imrotate(orig_img,rot_deg);
+orig_rotated(find(orig_rotated==0)) = 255;
+
+% Trim the orig_rotated of any empty vertical and horizontal edges
+orig_im_edge = edge(orig_rotated, 'prewitt');
+rv = [];
+cv = [];
+for ii = 1:size(orig_img_edge,1) % rows
+    if isempty(find(orig_img_edge(ii,:))) % empty horizontal edge exist
+        rv = [rv ii];
+    end
+end
+for ii = 1:size(orig_img_edge,2) % columns
+    if isempty(find(orig_img_edge(:,ii))) % empty vertical edge exist
+        cv = [cv ii];
+    end
+end
+orig_img(rv,:) = [];
+orig_img(:,cv) = [];
+
+% Find the orig_img_rotated boundaries 
+orig_rotated_edge = edge(orig_rotated, 'prewitt');
+
+% go through each column and find the border of orig_img_edge
+orig_rotated_edge_upper = zeros(1,size(orig_rotated_edge,2));
+orig_rotated_edge_lower = zeros(1,size(orig_rotated_edge,2));
+for ii = 1:size(orig_rotated_edge,2) 
+        orig_rotated_edge_upper(ii) = find(orig_rotated_edge(:,ii),1,'first');
+        orig_rotated_edge_lower(ii) = find(orig_rotated_edge(:,ii),1,'last');
+end
+
+% Compare the "narrowness" of the boundaries on the left half of the image
+% to those on the right half of the image
+ten_percent = round(.1*size(orig_rotated_edge,2));
+left_boundaries = orig_rotated_edge_upper(ten_percent) - orig_rotated_edge_lower(ten_percent);
+right_boundaries = orig_rotated_edge_upper(end-ten_percent) - orig_rotated_edge_lower(end-ten_percent);
+if left_boundaries > right_boundaries % if the narrow part points to the right
+    rot_deg = 180 + rot_deg;
+end
+rot_deg
