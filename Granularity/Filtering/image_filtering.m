@@ -30,10 +30,10 @@ end
 
 % Finding the non-white parts of the background, averaging them, and replacing white parts with
 %average
-non_w=orig_img(find(orig_img<=200));%Finding (bascially) non-white values
+non_w=orig_img(find(orig_img<=200));%Finding (bascially) non-white values<-----------MAY NEED TO CHANGE TO 255
 mean_non_w=mean(non_w);
 orig_img_bkgd = orig_img;
-orig_img_bkgd(orig_img>200)=mean_non_w;
+orig_img_bkgd(orig_img>200)=mean_non_w;%<-----------MAY NEED TO CHANGE TO 255
 
 % Padding the image on all sizes by half the length of the longest
 % dimension, to help with convolving below
@@ -57,7 +57,7 @@ end
 img_edge = edge(template_img,'prewitt');
 
 
-%% Creating the filter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Creating the filter 
 [f1 f2] = freqspace(dim_high, 'meshgrid');%creates square matrix between -1 and 1 with length and width of dim_high
 r = sqrt(f1.^2 + f2.^2);%finds distance of each point from center
 
@@ -143,7 +143,8 @@ if plot_energy_flag
     title('Granularity Spectrum, Unnormalized, No Background')
 
     subplot(2,1,2)
-    plot((1:6),energy_trim_vec./max(energy_trim_vec))
+    %plot((1:6),energy_trim_vec./max(energy_trim_vec))
+    plot((1:6),energy_trim_vec./sum(255^2*row_img*col_img));%normalzing by max value (where image has all 255 values for each pixel)
     xlabel('filter number')
     ylabel('energy/(max energy)')
     title('Granularity Spectrum, Normalized by Max, Includes Background')

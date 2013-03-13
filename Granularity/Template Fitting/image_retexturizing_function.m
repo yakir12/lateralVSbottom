@@ -1,26 +1,19 @@
-%%%%% Image Retexturizing%%%%%%%
+function [final_img] = image_retexturizing_function(orig_img, template_img, plot_flag)
+%% Image Retexturizing function %%%%%%%
 %Use this code to fit a cuttlefish image to a cuttlefish-shaped template
+% This function is just an adaptation from the code "image_retexturizing.m"
+% in the Template Fitting Subfolder
 
-%% Setting the stage
 
-clc;
-clear all;
-close all;
-cd('/Users/dtaniguchi/Documents/Cuttlefish Project/lateralVSbottom, Darcy Version/Template Fitting')
+%orig_img is the original image that will be fit to the template image
+    %template_img
+%plot_flag is an indicator if the retexturized image fit to the template
+    %should be plotted at the end (plot_flag = 1) or not (plot_flag = 0)
 
-set(0,'defaultaxesfontsize',30);%Setting plot paramters
-set(0,'defaulttextfontsize',30);
-set(0,'defaultlinelinewidth',2);
+%% Pre-process template image (template_img)
+template_img = imread(template_img);
 
-%% Init parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-tic %Sets the timer
-plot_flag = 1; %If this is 1, this script will plot images at the end of this code
-
-%% Read and pre-process template image %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Read in a template image
-template_img = imread('cuttlefish_template2.tif');
-
-% Convert image to grayscale if colored
+% Convert template image to grayscale if colored
 if size(template_img,3)==3
     template_img=rgb2gray(template_img);
 end
@@ -44,17 +37,15 @@ for ii = 1:size(template_edge,2)
     end
 end
 
-%% Read and pre-process original image (orig_img) %%%%%%%%%%%%%%%%%%%%%%%%%
-% Read in an original image
-orig_img=imread('Cuttlefish3.jpg');
-
+%% Pre-process original image (orig_img) 
+orig_img = imread(orig_img);
 % Convert image to grayscale if colored
 if size(orig_img,3)==3
     orig_img=rgb2gray(orig_img);
 end
 
 % Pre-process the orig image so the cuttlefish head is facing left
-rot_deg = image_rotation(orig_img,0);
+rot_deg = image_rotation(orig_img);
 orig_img_rotated = imrotate(orig_img,rot_deg);
 
 % Pre-process orig_img_rotated to ensure all colors inside the shape are
@@ -129,7 +120,7 @@ while partial_coverage
 end
 
 %% Post-processing of final_img by trimming it of any empty vertical and horizontal edges
-final_img_edge = edge(offset_template, 'prewitt');%find edges of image fit to template 
+final_img_edge = edge(offset_template,'prewitt');
 rv = [];
 cv = [];
 for ii = 1:size(final_img_edge,1) % rows
@@ -145,7 +136,7 @@ end
 final_img(rv,:) = [];
 final_img(:,cv) = [];
 
-%% Plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Plotting 
 if plot_flag
     orig_img = uint8(orig_img);
     subplot(2,2,1)
@@ -165,6 +156,6 @@ if plot_flag
     title('Template with Original (rotated) Texture')
     axis on
 end
-toc
+
 
 
