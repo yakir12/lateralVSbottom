@@ -94,6 +94,7 @@ parfor i = 1:n
     %     d = imfill(d,'holes');
         d = bwareaopen(d,100);
         d = bwconvhull(d,'objects');
+        d = imerode(d,strel('disk',2));
 
         label = reshape(repmat(reshape(single(1:m),[1,1,m]),sz),sz(1),sz(2)*m);
         label(~d) = 0;
@@ -124,9 +125,14 @@ parfor i = 1:n
         AB = repmat(ab,m,1);
         rect = round([[col2',row2']-AB/2,AB]);
     %%
+        j = 1;
+        I = rgb2gray(imread(fullfile(path1,fldr(i).name,[files(j).name(1:end-3),'jpg'])));
+        d = imresize(~d,[size(I,1),size(I,2)*m]);
+        d = reshape(d,[size(I),m]);
         for j = 1:m
             if ~isnan(row(j))
                 I = imadjust(rgb2gray(imread(fullfile(path1,fldr(i).name,[files(j).name(1:end-3),'jpg']))));
+                I(d(:,:,j)) = 128;
                 I2 = imrotate(I,-o(j),'crop');
                 I3 = imcrop(I2,rect(j,:));
                 if any(size(I3) < fliplr(rect(j,3:4)+1))
