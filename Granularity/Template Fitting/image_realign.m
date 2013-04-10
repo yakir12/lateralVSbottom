@@ -87,10 +87,12 @@ else
                 template_tmp = offset_template;
                 template_tmp(find(orig > 240)) = 255;%find parts of orig that are basically white and make the corresponding
                     %locations in the temp template white
-                    
-                if isequal(template_tmp, offset_template)%basically a way to see if the orig image completely overlaps the template
-                        %by comparing the offset template and the offset
-                        %template turned white in certain parts
+                
+                template_diff = template_tmp - offset_template;
+                if length(find(template_diff ~= 0)) < 50 % if the template_tmp and offset_template differs by less than 50 pixels
+                    %then we conclude that orig image completely overlaps the template
+                    %by comparing the offset template and the offset
+                    %template turned white in certain parts
                     flag = 0; % orig fully covers template
                     offset_template_final = offset_template;
                 end
